@@ -8,7 +8,6 @@ function Signup() {
     password: "",
   });
 
-  // Handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -16,26 +15,29 @@ function Signup() {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/signup",
+        "http://localhost:5000/api/auth/register",
         formData
       );
 
       alert(response.data.message);
 
-      // Clear the form after successful signup
       setFormData({
         name: "",
         email: "",
         password: "",
       });
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
+      console.log("Signup Error:", error);
+
+      alert(
+        error.response?.data?.message ||
+        "Something went wrong"
+      );
     }
   };
 
@@ -80,7 +82,9 @@ function Signup() {
         <br />
         <br />
 
-        <button type="submit">Signup</button>
+        <button type="submit">
+          Signup
+        </button>
       </form>
     </div>
   );
