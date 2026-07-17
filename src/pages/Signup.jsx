@@ -1,4 +1,4 @@
-import { useState } from "react";
+wwimport { useState } from "react";
 import axios from "axios";
 
 function Signup() {
@@ -8,6 +8,7 @@ function Signup() {
     password: "",
   });
 
+  // Handle input changes
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -15,29 +16,26 @@ function Signup() {
     });
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/register",
+        "http://localhost:5000/api/auth/signup",
         formData
       );
 
       alert(response.data.message);
 
+      // Clear the form after successful signup
       setFormData({
         name: "",
         email: "",
         password: "",
       });
     } catch (error) {
-      console.log("Signup Error:", error);
-
-      alert(
-        error.response?.data?.message ||
-        "Something went wrong"
-      );
+      alert(error.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -82,9 +80,7 @@ function Signup() {
         <br />
         <br />
 
-        <button type="submit">
-          Signup
-        </button>
+        <button type="submit">Signup</button>
       </form>
     </div>
   );
