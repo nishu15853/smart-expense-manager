@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function Login() {
+    const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -32,9 +34,11 @@ function Login() {
         JSON.stringify(response.data.user)
       );
 
+
+
       alert("Login successful");
 
-      console.log("Login Response:", response.data);
+       navigate("/dashboard");
     } catch (error) {
       console.log("Login Error:", error);
 
