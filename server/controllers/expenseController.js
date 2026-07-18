@@ -17,7 +17,6 @@ const addExpense = async (req, res) => {
       message: "Expense added successfully",
       expense,
     });
-
   } catch (error) {
     console.log("Add Expense Error:", error);
 
@@ -27,7 +26,7 @@ const addExpense = async (req, res) => {
   }
 };
 
-// GET ALL EXPENSES OF LOGGED-IN USER
+// GET ALL EXPENSES
 const getExpenses = async (req, res) => {
   try {
     const expenses = await Expense.find({
@@ -38,9 +37,68 @@ const getExpenses = async (req, res) => {
       message: "Expenses fetched successfully",
       expenses,
     });
-
   } catch (error) {
     console.log("Get Expenses Error:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+// UPDATE EXPENSE
+const updateExpense = async (req, res) => {
+  try {
+    const expense = await Expense.findOneAndUpdate(
+      {
+        _id: req.params.id,
+        user: req.userId,
+      },
+      req.body,
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
+
+    if (!expense) {
+      return res.status(404).json({
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Expense updated successfully",
+      expense,
+    });
+  } catch (error) {
+    console.log("Update Expense Error:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+};
+
+// DELETE EXPENSE
+const deleteExpense = async (req, res) => {
+  try {
+    const expense = await Expense.findOneAndDelete({
+      _id: req.params.id,
+      user: req.userId,
+    });
+
+    if (!expense) {
+      return res.status(404).json({
+        message: "Expense not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Expense deleted successfully",
+    });
+  } catch (error) {
+    console.log("Delete Expense Error:", error);
 
     res.status(500).json({
       message: "Server error",
@@ -51,4 +109,6 @@ const getExpenses = async (req, res) => {
 module.exports = {
   addExpense,
   getExpenses,
+  updateExpense,
+  deleteExpense,
 };
