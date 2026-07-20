@@ -21,9 +21,9 @@ function Login() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
+         "https://smart-expense-manager-9exq.onrender.com/api/auth/login",
+     formData
+       );
 
       //jwt token save
       localStorage.setItem("token", response.data.token);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
+
 function Signup() {
   const [formData, setFormData] = useState({
     name: "",
@@ -22,9 +23,9 @@ function Signup() {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/signup",
+          "https://smart-expense-manager-9exq.onrender.com/api/auth/register" ,
         formData
-      );
+    );
 
       alert(response.data.message);
 

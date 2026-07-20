@@ -1,7 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 
-function ExpenseForm() {
+function ExpenseForm( {fetchExpenses} ) {
   const [expense, setExpense] = useState({
     title: "",
     amount: "",
@@ -19,18 +19,24 @@ const handleSubmit = async (e) => {
 
   try {
     const token = localStorage.getItem("token");
-
-    const response = await axios.post(
-      "http://localhost:5000/api/expenses",
-      expense,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+   console.log(expense);
+   const response = await axios.post(
+  "https://smart-expense-manager-9exq.onrender.com/api/expenses",
+  {
+    title: expense.title,
+    amount: Number(expense.amount),
+    category: expense.category,
+    // date temporarily remove
+  },
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
     alert("Expense Added Successfully!");
+    fetchExpenses();
 
     console.log(response.data);
 
@@ -41,9 +47,12 @@ const handleSubmit = async (e) => {
       date: "",
     });
   } catch (error) {
-    console.log(error);
-    alert(error.response?.data?.message || "Something went wrong");
-  }
+  console.log("Full Error:", error);
+  console.log("Response:", error.response);
+  console.log("Data:", error.response?.data);
+
+  alert(error.response?.data?.message || "Something went wrong");
+}
 };
 
   return (
