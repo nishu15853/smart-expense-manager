@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 function Dashboard() {
   const [expenses, setExpenses] = useState([]);
+const [editingExpense, setEditingExpense] = useState(null);
   
   const fetchExpenses = async () => {
   try {
@@ -27,6 +28,27 @@ function Dashboard() {
 useEffect(() => {
   fetchExpenses();
 }, []);
+const deleteExpense = async (id) => {
+  try {
+    const token = localStorage.getItem("token");
+
+    await axios.delete(
+      `https://smart-expense-manager-9exq.onrender.com/api/expenses/${id}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    alert("Expense Deleted Successfully!");
+
+    fetchExpenses();
+  } catch (error) {
+    console.log(error);
+    alert(error.response?.data?.message || "Delete Failed");
+  }
+};
   
   return (
    
@@ -78,7 +100,11 @@ useEffect(() => {
           <p>₹0</p>
         </div>
       </div>
-      <ExpenseForm fetchExpenses={fetchExpenses} />
+     <ExpenseForm
+     fetchExpenses={fetchExpenses}
+    editingExpense={editingExpense}
+    setEditingExpense={setEditingExpense}
+/>
       <h2 style={{ marginTop: "30px" }}>All Expenses</h2>
 
 {expenses.length === 0 ? (
@@ -87,11 +113,12 @@ useEffect(() => {
   <table border="1" cellPadding="10" style={{ marginTop: "10px" }}>
     <thead>
       <tr>
-        <th>Title</th>
-        <th>Amount</th>
-        <th>Category</th>
-        <th>Date</th>
-      </tr>
+     <th>Title</th>
+     <th>Amount</th>
+    <th>Category</th>
+    <th>Date</th>
+    <th>Action</th>
+</tr>
     </thead>
 
     <tbody>
@@ -101,6 +128,36 @@ useEffect(() => {
           <td>₹{expense.amount}</td>
           <td>{expense.category}</td>
           <td>{new Date(expense.date).toLocaleDateString()}</td>
+            <td>
+  <button
+   onClick={() => setEditingExpense(expense)}
+    style={{
+      backgroundColor: "green",
+      color: "white",
+      border: "none",
+      padding: "6px 12px",
+      borderRadius: "5px",
+      cursor: "pointer",
+      marginRight: "10px",
+    }}
+  >
+    Edit
+  </button>
+
+  <button
+    onClick={() => deleteExpense(expense._id)}
+    style={{
+      backgroundColor: "red",
+      color: "white",
+      border: "none",
+      padding: "6px 12px",
+      borderRadius: "5px",
+      cursor: "pointer",
+    }}
+  >
+    Delete
+    </button>
+  </td>
         </tr>
       ))}
     </tbody>

@@ -1,14 +1,28 @@
-import { useState } from "react";
+import { useState,useEffect  } from "react";
 import axios from "axios";
 
-function ExpenseForm( {fetchExpenses} ) {
+function ExpenseForm( {fetchExpenses, editingExpense,setEditingExpense} ) {
   const [expense, setExpense] = useState({
+    
     title: "",
     amount: "",
     category: "",
     date: "",
   });
+  useEffect(() => {
+  if (editingExpense) {
+    setExpense({
+      title: editingExpense.title,
+      amount: editingExpense.amount,
+      category: editingExpense.category,
+      date: editingExpense.date
+        ? editingExpense.date.split("T")[0]
+        : "",
+    });
+  }
+}, [editingExpense]);
   const handleChange = (e) => {
+  
   setExpense({
     ...expense,
     [e.target.name]: e.target.value,
@@ -19,6 +33,35 @@ const handleSubmit = async (e) => {
 
   try {
     const token = localStorage.getItem("token");
+    if (editingExpense) {
+  await axios.put(
+    `https://smart-expense-manager-9exq.onrender.com/api/expenses/${editingExpense._id}`,
+    {
+      title: expense.title,
+      amount: Number(expense.amount),
+      category: expense.category,
+      date: expense.date,
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  alert("Expense Updated Successfully!");
+
+  fetchExpenses();
+
+  setExpense({
+    title: "",
+    amount: "",
+    category: "",
+    date: "",
+  });
+setEditingExpense(null);
+  return;
+}
    console.log(expense);
    const response = await axios.post(
   "https://smart-expense-manager-9exq.onrender.com/api/expenses",
@@ -110,7 +153,7 @@ const handleSubmit = async (e) => {
         <br /><br />
 
         <button type="submit">
-          Add Expense
+         {editingExpense ? "Update Expense" : "Add Expense"}
         </button>
       </form>
     </div>
