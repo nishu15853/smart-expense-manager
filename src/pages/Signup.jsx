@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 
-
 function Signup() {
+   const navigate = useNavigate();
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -27,17 +29,22 @@ function Signup() {
         formData
     );
 
-      alert(response.data.message);
+      // Save token and user
+localStorage.setItem("token", response.data.token);
+localStorage.setItem(
+  "user",
+  JSON.stringify(response.data.user)
+);
 
-      // Clear the form after successful signup
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
+// Clear error
+setErrorMessage("");
+
+// Redirect to dashboard
+navigate("/dashboard");
     } catch (error) {
-      alert(error.response?.data?.message || "Something went wrong");
-    }
+setErrorMessage(
+  error.response?.data?.message || "Something went wrong"
+);    }
   };
 
   return (
@@ -82,6 +89,17 @@ function Signup() {
         <br />
 
         <button type="submit">Signup</button>
+        {errorMessage && (
+  <div>
+    <p style={{ color: "red" }}>{errorMessage}</p>
+
+    {errorMessage.includes("already exists") && (
+      <Link to="/login">
+        Go to Login
+      </Link>
+    )}
+  </div>
+)}
       </form>
     </div>
   );
