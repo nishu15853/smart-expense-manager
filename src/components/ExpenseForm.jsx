@@ -7,6 +7,7 @@ function ExpenseForm( {fetchExpenses, editingExpense,setEditingExpense} ) {
     title: "",
     amount: "",
     category: "",
+    type:"",
     date: "",
   });
   useEffect(() => {
@@ -15,6 +16,7 @@ function ExpenseForm( {fetchExpenses, editingExpense,setEditingExpense} ) {
       title: editingExpense.title,
       amount: editingExpense.amount,
       category: editingExpense.category,
+       type: editingExpense.type,
       date: editingExpense.date
         ? editingExpense.date.split("T")[0]
         : "",
@@ -30,6 +32,8 @@ function ExpenseForm( {fetchExpenses, editingExpense,setEditingExpense} ) {
 };
 const handleSubmit = async (e) => {
   e.preventDefault();
+   console.log("Handle Submit Called");
+   console.log("Expense State:", expense);
 
   try {
     const token = localStorage.getItem("token");
@@ -40,6 +44,7 @@ const handleSubmit = async (e) => {
       title: expense.title,
       amount: Number(expense.amount),
       category: expense.category,
+       type: expense.type,
       date: expense.date,
     },
     {
@@ -57,18 +62,28 @@ const handleSubmit = async (e) => {
     title: "",
     amount: "",
     category: "",
+    type:"",
     date: "",
   });
 setEditingExpense(null);
   return;
 }
    console.log(expense);
+   console.log("Sending:", {
+  title: expense.title,
+  amount: Number(expense.amount),
+  category: expense.category,
+  type: expense.type,
+  date: expense.date,
+});
    const response = await axios.post(
   "https://smart-expense-manager-9exq.onrender.com/api/expenses",
   {
     title: expense.title,
     amount: Number(expense.amount),
     category: expense.category,
+     type: expense.type,
+    date: expense.date,
     // date temporarily remove
   },
   {
@@ -87,6 +102,7 @@ setEditingExpense(null);
       title: "",
       amount: "",
       category: "",
+       type: "",
       date: "",
     });
   } catch (error) {
@@ -141,6 +157,18 @@ setEditingExpense(null);
         </select>
 
         <br /><br />
+        <select
+  name="type"
+  value={expense.type}
+  onChange={handleChange}
+  required
+>
+  <option value="">Select Type</option>
+  <option value="Income">Income</option>
+  <option value="Expense">Expense</option>
+</select>
+
+<br /><br />
 
         <input
           type="date"

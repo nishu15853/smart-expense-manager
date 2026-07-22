@@ -4,9 +4,20 @@ import axios from "axios";
 function Dashboard() {
   const [expenses, setExpenses] = useState([]);
 const [editingExpense, setEditingExpense] = useState(null);
-  
+   const totalIncome = expenses
+  .filter((expense) => expense.type === "Income")
+  .reduce((sum, expense) => sum + expense.amount, 0);
+
+const totalExpense = expenses
+  .filter((expense) => expense.type === "Expense")
+  .reduce((sum, expense) => sum + expense.amount, 0);
+ 
+
+const totalBalance = totalIncome - totalExpense;
+console.log(expenses);
   const fetchExpenses = async () => {
   try {
+    
     const token = localStorage.getItem("token");
 
     const response = await axios.get(
@@ -17,6 +28,9 @@ const [editingExpense, setEditingExpense] = useState(null);
         },
       }
     );
+    console.log(response.data.expenses);
+ console.log(response.data.expenses);
+
 
     console.log(response.data);
 
@@ -73,7 +87,7 @@ const deleteExpense = async (id) => {
           }}
         >
           <h3>Total Balance</h3>
-          <p>₹0</p>
+         <p>₹{totalBalance}</p>
         </div>
 
         <div
@@ -85,7 +99,7 @@ const deleteExpense = async (id) => {
           }}
         >
           <h3>Total Income</h3>
-          <p>₹0</p>
+        <p>₹{totalIncome}</p>
         </div>
 
         <div
@@ -97,7 +111,7 @@ const deleteExpense = async (id) => {
           }}
         >
           <h3>Total Expense</h3>
-          <p>₹0</p>
+         <p>₹{totalExpense}</p>
         </div>
       </div>
      <ExpenseForm
@@ -116,6 +130,7 @@ const deleteExpense = async (id) => {
      <th>Title</th>
      <th>Amount</th>
     <th>Category</th>
+    <th>Type</th>
     <th>Date</th>
     <th>Action</th>
 </tr>
@@ -127,6 +142,7 @@ const deleteExpense = async (id) => {
           <td>{expense.title}</td>
           <td>₹{expense.amount}</td>
           <td>{expense.category}</td>
+          <td>{expense.type}</td>
           <td>{new Date(expense.date).toLocaleDateString()}</td>
             <td>
   <button

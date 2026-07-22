@@ -3,12 +3,12 @@ const Expense = require("../models/Expense");
 // ADD NEW EXPENSE
 const addExpense = async (req, res) => {
   try {
-    const { title, amount, category, date } = req.body;
+    const { title, amount, category,type, date } = req.body;
 
     // INPUT VALIDATION
-    if (!title || amount === undefined || !category) {
+    if (!title || amount === undefined || !category|| !type) {
       return res.status(400).json({
-        message: "Title, amount and category are required",
+        message: "Title, amount and category and type are required",
       });
     }
 
@@ -17,14 +17,17 @@ const addExpense = async (req, res) => {
         message: "Amount must be a number greater than 0",
       });
     }
-
+    console.log("Request Body:", req.body);
+   
     const expense = await Expense.create({
       user: req.userId,
       title,
       amount,
       category,
-      date,
+      type,
+      date,  
     });
+    console.log("Saved Expense:", expense);
 
     res.status(201).json({
       message: "Expense added successfully",
@@ -154,7 +157,7 @@ const getSingleExpense = async (req, res) => {
 // UPDATE EXPENSE
 const updateExpense = async (req, res) => {
   try {
-    const { title, amount, category } = req.body;
+    const { title, amount, category ,type} = req.body;
 
     // VALIDATE AMOUNT IF USER IS UPDATING IT
     if (
