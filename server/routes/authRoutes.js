@@ -2,7 +2,9 @@ const express = require("express");
 
 const {
   registerUser,
-  loginUser
+  loginUser,
+  redirectToGoogle,
+  handleGoogleCallback
 } = require("../controllers/authController");
 
 const protect = require("../middleware/authMiddleware");
@@ -14,6 +16,10 @@ router.post("/register", registerUser);
 
 // Login Route
 router.post("/login", loginUser);
+
+// Google OAuth Routes
+router.get("/google", redirectToGoogle);
+router.get("/google/callback", handleGoogleCallback);
 
 // Protected Test Route
 router.get("/profile", protect, (req, res) => {

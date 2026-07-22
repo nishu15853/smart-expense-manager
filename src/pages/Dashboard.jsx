@@ -1,6 +1,7 @@
 import ExpenseForm from "../components/ExpenseForm";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 function Dashboard() {
   const [expenses, setExpenses] = useState([]);
 const [editingExpense, setEditingExpense] = useState(null);
@@ -21,7 +22,7 @@ console.log(expenses);
     const token = localStorage.getItem("token");
 
     const response = await axios.get(
-      "https://smart-expense-manager-9exq.onrender.com/api/expenses",
+      `${API_BASE_URL}/api/expenses`,
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -40,6 +41,17 @@ console.log(expenses);
   }
 };
 useEffect(() => {
+  const queryParams = new URLSearchParams(window.location.search);
+  const tokenFromUrl = queryParams.get("token");
+  const userFromUrl = queryParams.get("user");
+
+  if (tokenFromUrl && userFromUrl) {
+    localStorage.setItem("token", tokenFromUrl);
+    localStorage.setItem("user", userFromUrl);
+    // Clean up the URL query parameters
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
+
   fetchExpenses();
 }, []);
 const deleteExpense = async (id) => {
@@ -47,7 +59,7 @@ const deleteExpense = async (id) => {
     const token = localStorage.getItem("token");
 
     await axios.delete(
-      `https://smart-expense-manager-9exq.onrender.com/api/expenses/${id}`,
+      `${API_BASE_URL}/api/expenses/${id}`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

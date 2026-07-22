@@ -1,5 +1,6 @@
 import { useState,useEffect  } from "react";
 import axios from "axios";
+import { API_BASE_URL } from "../config";
 
 function ExpenseForm( {fetchExpenses, editingExpense,setEditingExpense} ) {
   const [expense, setExpense] = useState({
@@ -39,7 +40,7 @@ const handleSubmit = async (e) => {
     const token = localStorage.getItem("token");
     if (editingExpense) {
   await axios.put(
-    `https://smart-expense-manager-9exq.onrender.com/api/expenses/${editingExpense._id}`,
+    `${API_BASE_URL}/api/expenses/${editingExpense._id}`,
     {
       title: expense.title,
       amount: Number(expense.amount),
@@ -77,7 +78,7 @@ setEditingExpense(null);
   date: expense.date,
 });
    const response = await axios.post(
-  "https://smart-expense-manager-9exq.onrender.com/api/expenses",
+  `${API_BASE_URL}/api/expenses`,
   {
     title: expense.title,
     amount: Number(expense.amount),

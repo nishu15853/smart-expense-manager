@@ -126,7 +126,134 @@ const loginUser = async (req, res) => {
   }
 };
 
+// REDIRECT TO GOOGLE OAUTH
+const redirectToGoogle = (req, res) => {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const redirectUri = process.env.GOOGLE_CALLBACK_URL;
+  
+  if (!clientId || !redirectUri) {
+    return res.status(500).json({
+      message: "Google OAuth configuration is missing on the server",
+    });
+  }
+
+  const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(
+    redirectUri
+  )}&scope=profile%20email`;
+
+  res.redirect(authUrl);
+};
+
+// HANDLE GOOGLE CALLBACK
+const handleGoogleCallback = async (req, res) => {
+  try {
+    const { code } = req.query;
+
+    if (!code) {
+      return res.status(400).json({ message: "Authorization code is missing" });
+    }
+
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri = process.env.GOOGLE_CALLBACK_URL;
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    // Exchange authorization code for token
+    const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!tokenResponse.ok) {
+      const errorText = await tokenResponse.text();
+      console.error("Token exchange failed:", errorText);
+      return res.status(400).json({ message: "Failed to exchange authorization code" });
+    }
+
+    const tokenData = await tokenResponse.json();
+    const { access_token } = tokenData;
+
+    // Fetch user info from Google
+    const profileResponse = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+      headers: {
+        Authorization: `Bearer ${access_token}`,
+      },
+    });
+
+    if (!profileResponse.ok) {
+      return res.status(400).json({ message: "Failed to fetch user profile from Google" });
+    }
+
+    const profile = await profileResponse.json();
+    const googleId = profile.sub;
+    const email = profile.email;
+    const name = profile.name;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email not provided by Google account" });
+    }
+
+    // 1. Search by googleId (Scenario B: Existing Google User)
+    let user = await User.findOne({ googleId });
+
+    if (user) {
+      const token = generateToken(user._id);
+      const userObj = { id: user._id, name: user.name, email: user.email };
+      return res.redirect(
+        `${frontendUrl}/dashboard?token=${token}&user=${encodeURIComponent(
+          JSON.stringify(userObj)
+        )}`
+      );
+    }
+
+    // 2. Search by email (Scenario C: Existing Email/Password User)
+    user = await User.findOne({ email });
+
+    if (user) {
+      user.googleId = googleId;
+      await user.save();
+
+      const token = generateToken(user._id);
+      const userObj = { id: user._id, name: user.name, email: user.email };
+      return res.redirect(
+        `${frontendUrl}/dashboard?token=${token}&user=${encodeURIComponent(
+          JSON.stringify(userObj)
+        )}`
+      );
+    }
+
+    // 3. Scenario A: New User
+    user = await User.create({
+      name,
+      email,
+      googleId,
+    });
+
+    const token = generateToken(user._id);
+    const userObj = { id: user._id, name: user.name, email: user.email };
+    return res.redirect(
+      `${frontendUrl}/dashboard?token=${token}&user=${encodeURIComponent(
+        JSON.stringify(userObj)
+      )}`
+    );
+  } catch (error) {
+    console.error("Google OAuth Error:", error);
+    res.status(500).json({ message: "Internal Server Error during Google Auth" });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  redirectToGoogle,
+  handleGoogleCallback,
 };
