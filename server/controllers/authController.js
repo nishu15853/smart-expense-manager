@@ -2,6 +2,14 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+const generateToken = (userId) => {
+  return jwt.sign(
+    { userId },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
+
 // REGISTER USER
 const registerUser = async (req, res) => {
   try {
@@ -25,10 +33,11 @@ const registerUser = async (req, res) => {
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({
-        message: "User already exists",
-      });
-    }
+  return res.status(409).json({
+    message:
+      "An account with this email already exists. Please log in instead.",
+  });
+}
 
     // HASH PASSWORD
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -40,9 +49,13 @@ const registerUser = async (req, res) => {
       password: hashedPassword,
     });
 
+    // CREATE JWT TOKEN
+const token = generateToken(user._id);
+
     // SEND RESPONSE WITHOUT PASSWORD
     res.status(201).json({
       message: "User registered successfully",
+      token,
       user: {
         id: user._id,
         name: user.name,
@@ -92,15 +105,7 @@ const loginUser = async (req, res) => {
     }
 
     // CREATE JWT TOKEN
-    const token = jwt.sign(
-      {
-        userId: user._id,
-      },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "7d",
-      }
-    );
+   const token = generateToken(user._id);
 
     // SEND RESPONSE WITHOUT PASSWORD
     res.status(200).json({
