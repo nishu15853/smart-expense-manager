@@ -1,4 +1,5 @@
 import ExpenseForm from "../components/ExpenseForm";
+import PieChart from "../components/PieChart";
 import { useEffect, useState } from "react";
 import axios from "axios";
 function Dashboard() {
@@ -115,10 +116,15 @@ const deleteExpense = async (id) => {
         </div>
       </div>
      <ExpenseForm
-     fetchExpenses={fetchExpenses}
+      fetchExpenses={fetchExpenses}
     editingExpense={editingExpense}
     setEditingExpense={setEditingExpense}
+ 
 />
+    
+
+   <PieChart   expenses={expenses} />
+   
       <h2 style={{ marginTop: "30px" }}>All Expenses</h2>
 
 {expenses.length === 0 ? (
