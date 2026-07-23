@@ -31,3 +31,6 @@ server/node_modules/
 *.sln
 *.sw?
 
+# Local MongoDB data directory
+mongodb_data/
+
