@@ -4,7 +4,7 @@ import axios from "axios";
 import { API_BASE_URL } from "../config";
 
 function Login() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -22,9 +22,9 @@ function Login() {
 
     try {
       const response = await axios.post(
-         `${API_BASE_URL}/api/auth/login`,
-     formData
-       );
+        `${API_BASE_URL}/api/auth/login`,
+        formData
+      );
 
       //jwt token save
       localStorage.setItem("token", response.data.token);
@@ -39,13 +39,13 @@ function Login() {
 
       alert("Login successful");
 
-       navigate("/dashboard");
+      navigate("/dashboard");
     } catch (error) {
       console.log("Login Error:", error);
 
       alert(
         error.response?.data?.message ||
-          "Something went wrong"
+        "Something went wrong"
       );
     }
   };
@@ -95,9 +95,9 @@ function Login() {
           <div style={{ flex: 1, height: "1px", backgroundColor: "#dadce0" }}></div>
         </div>
 
-        <button 
+        <button
           type="button"
-          onClick={handleGoogleSignIn} 
+          onClick={handleGoogleSignIn}
           style={{
             display: "flex",
             alignItems: "center",
@@ -125,10 +125,10 @@ function Login() {
           }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" style={{ marginRight: "4px" }}>
-            <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.9c1.69-1.55 2.69-3.84 2.69-6.57z"/>
-            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.8.54-1.84.87-3.06.87-2.35 0-4.33-1.58-5.04-3.71H.94v2.3C2.42 15.98 5.48 18 9 18z"/>
-            <path fill="#FBBC05" d="M3.96 10.74c-.18-.54-.28-1.12-.28-1.74s.1-1.2.28-1.74V4.96H.94A8.99 8.99 0 0 0 0 9c0 1.5.37 2.93 1.02 4.19l2.94-2.45z"/>
-            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.97 11.41 0 9 0 5.48 0 2.42 2.02.94 4.96l2.94 2.45c.71-2.13 2.69-3.71 5.04-3.71z"/>
+            <path fill="#4285F4" d="M17.64 9.2c0-.63-.06-1.25-.16-1.84H9v3.47h4.84c-.21 1.12-.84 2.07-1.79 2.7v2.24h2.9c1.69-1.55 2.69-3.84 2.69-6.57z" />
+            <path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.24c-.8.54-1.84.87-3.06.87-2.35 0-4.33-1.58-5.04-3.71H.94v2.3C2.42 15.98 5.48 18 9 18z" />
+            <path fill="#FBBC05" d="M3.96 10.74c-.18-.54-.28-1.12-.28-1.74s.1-1.2.28-1.74V4.96H.94A8.99 8.99 0 0 0 0 9c0 1.5.37 2.93 1.02 4.19l2.94-2.45z" />
+            <path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35L15 2.4C13.46.97 11.41 0 9 0 5.48 0 2.42 2.02.94 4.96l2.94 2.45c.71-2.13 2.69-3.71 5.04-3.71z" />
           </svg>
           Sign in with Google
         </button>
