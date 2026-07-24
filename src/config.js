@@ -1,3 +1,2 @@
-export const API_BASE_URL = window.location.hostname === "localhost"
-  ? "http://localhost:5000"
-  : "https://smart-expense-manager-9exq.onrender.com";
+
+export const API_BASE_URL = "https://smart-expense-manager-9exq.onrender.com";

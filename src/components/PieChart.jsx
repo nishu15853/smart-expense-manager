@@ -8,6 +8,7 @@ import {
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
+
 function PieChart({ expenses }) {
   const categoryTotals = {
     Food: 0,
@@ -27,33 +28,27 @@ function PieChart({ expenses }) {
 );
   expenses.forEach((expense) => {
   if (
-    expense.type === "Expense" &&
+   expense.type === "Expense" &&
     expense.category &&
     categoryTotals.hasOwnProperty(expense.category)
   ) {
     categoryTotals[expense.category] += expense.amount;
   }
 });
+console.log(Object.values(categoryTotals));
 console.log(categoryTotals);
-  const data = {
-    labels: Object.keys(categoryTotals),
-    datasets: [
-      {
-        label: "Expenses",
-        data: Object.values(categoryTotals),
-        backgroundColor: [
-          "#FF6384",
-          "#36A2EB",
-          "#FFCE56",
-          "#4BC0C0",
-          "#9966FF",
-          "#FF9F40",
-        ],
-        borderColor: "#ffffff",
-        borderWidth: 2,
-      },
-    ],
-  };
+console.table(expenses);
+console.table(
+  expenses.map((e) => ({
+    title: e.title,
+    type: e.type,
+    category: e.category,
+    amount: e.amount,
+  }))
+);
+ const labels = ["Food", "Travel", "Shopping", "Bills", "Health", "Other"];
+
+
 
   const options = {
   responsive: true,
@@ -64,7 +59,30 @@ console.log(categoryTotals);
     },
   },
 };
-
+const filteredData = labels
+  .map((label) => ({
+    label,
+    value: categoryTotals[label],
+    color: {
+      Food: "#FF6384",
+      Travel: "#36A2EB",
+      Shopping: "#FFCE56",
+      Bills: "#4BC0C0",
+      Health: "#9966FF",
+      Other: "#FF9F40",
+    }[label],
+  }))
+  .filter((item) => item.value > 0);
+  const data = {
+  labels: filteredData.map((item) => item.label),
+  datasets: [
+    {
+      label: "Expenses",
+      data: filteredData.map((item) => item.value),
+      backgroundColor: filteredData.map((item) => item.color),
+    },
+  ],
+};
   return (
   <div
     style={{
@@ -80,6 +98,7 @@ console.log(categoryTotals);
     <h2 style={{ textAlign: "center" }}>Expense by Category</h2>
 
     <Pie data={data} options={options} />
+   
   </div>
 );
 }

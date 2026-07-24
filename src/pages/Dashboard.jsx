@@ -1,11 +1,16 @@
 import ExpenseForm from "../components/ExpenseForm";
 import PieChart from "../components/PieChart";
+import BarChart from "../components/BarChart";
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
 function Dashboard() {
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [typeFilter, setTypeFilter] = useState("All");
+  const [categoryFilter, setCategoryFilter] = useState("All");
   const totalIncome = expenses
     .filter((expense) => expense.type === "Income")
     .reduce((sum, expense) => sum + expense.amount, 0);
@@ -76,7 +81,20 @@ function Dashboard() {
       alert(error.response?.data?.message || "Delete Failed");
     }
   };
+ const filteredExpenses = expenses.filter((expense) => {
+  const matchesSearch = expense.title
+    .toLowerCase()
+    .includes(searchTerm.toLowerCase());
 
+  const matchesType =
+    typeFilter === "All" || expense.type === typeFilter;
+    
+  const matchesCategory =
+    categoryFilter === "All" ||
+    expense.category === categoryFilter;
+
+  return matchesSearch && matchesType;
+});
   return (
 
     <div style={{ padding: "20px" }}>
@@ -133,6 +151,51 @@ function Dashboard() {
         setEditingExpense={setEditingExpense}
       />
       <h2 style={{ marginTop: "30px" }}>All Expenses</h2>
+      <input
+  type="text"
+  placeholder="Search by title..."
+  value={searchTerm}
+  onChange={(e) => setSearchTerm(e.target.value)}
+  style={{
+    padding: "10px",
+    width: "300px",
+    margin: "15px 0",
+    borderRadius: "8px",
+    border: "1px solid #ccc",
+  }}
+/>
+<select
+  value={typeFilter}
+  onChange={(e) => setTypeFilter(e.target.value)}
+  style={{
+    padding: "10px",
+    marginLeft: "15px",
+    borderRadius: "8px",
+  }}
+>
+  <option value="All">All</option>
+  <option value="Income">Income</option>
+  <option value="Expense">Expense</option>
+</select>
+<select
+  value={categoryFilter}
+  onChange={(e) => setCategoryFilter(e.target.value)}
+  style={{
+    padding: "10px",
+    marginLeft: "15px",
+    borderRadius: "8px",
+  }}
+>
+  <option value="All">All Categories</option>
+  <option value="Food">Food</option>
+  <option value="Travel">Travel</option>
+  <option value="Shopping">Shopping</option>
+  <option value="Bills">Bills</option>
+  <option value="Health">Health</option>
+  <option value="Other">Other</option>
+</select>
+      <PieChart expenses={expenses} />
+       <BarChart expenses={expenses} />
 
       {expenses.length === 0 ? (
         <p>No expenses found.</p>
@@ -150,7 +213,7 @@ function Dashboard() {
           </thead>
 
           <tbody>
-            {expenses.map((expense) => (
+            {filteredExpenses.map((expense) => (
               <tr key={expense._id}>
                 <td>{expense.title}</td>
                 <td>₹{expense.amount}</td>
