@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-import ExpenseForm from "../components/ExpenseForm";
-import PieChart from "../components/PieChart";
-import BarChart from "../components/BarChart";
-
-=======
->>>>>>> 6192511 (refactor: UI components, date filtering, and resolve lint/build checks)
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -21,14 +14,10 @@ function Dashboard() {
   const navigate = useNavigate();
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
-<<<<<<< HEAD
-  const [searchTerm, setSearchTerm] = useState("");
-  const [typeFilter, setTypeFilter] = useState("All");
-  const [categoryFilter, setCategoryFilter] = useState("All");
-  const totalIncome = expenses
-=======
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
+  const typeFilter = "All";
+  const categoryFilter = "All";
 
   const [dateFilter, setDateFilter] = useState("30D");
   const [customDate, setCustomDate] = useState("");
@@ -62,6 +51,18 @@ function Dashboard() {
     year1Ago.setHours(0, 0, 0, 0);
 
     return expenses.filter((item) => {
+      // Search title filter
+      const matchesSearch = !searchTerm || item.title?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Type filter
+      const matchesType = typeFilter === "All" || item.type === typeFilter;
+
+      // Category filter
+      const matchesCategory = categoryFilter === "All" || item.category === categoryFilter;
+
+      if (!matchesSearch || !matchesType || !matchesCategory) return false;
+
+      // Date filter
       if (!item.date) return true;
       const itemDate = new Date(item.date);
       const itemDateStr = itemDate.toISOString().split("T")[0];
@@ -132,7 +133,6 @@ function Dashboard() {
   };
 
   const totalIncome = filteredExpenses
->>>>>>> 6192511 (refactor: UI components, date filtering, and resolve lint/build checks)
     .filter((expense) => expense.type === "Income")
     .reduce((sum, expense) => sum + expense.amount, 0);
 
@@ -199,20 +199,7 @@ function Dashboard() {
       alert(error.response?.data?.message || "Delete Failed");
     }
   };
- const filteredExpenses = expenses.filter((expense) => {
-  const matchesSearch = expense.title
-    .toLowerCase()
-    .includes(searchTerm.toLowerCase());
 
-  const matchesType =
-    typeFilter === "All" || expense.type === typeFilter;
-    
-  const matchesCategory =
-    categoryFilter === "All" ||
-    expense.category === categoryFilter;
-
-  return matchesSearch && matchesType;
-});
   return (
     <div style={{ display: "flex", width: "100%", minHeight: "100vh", backgroundColor: "var(--bg-main)" }}>
       {/* 1. Left Sidebar Navigation */}

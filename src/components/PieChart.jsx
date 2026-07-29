@@ -17,39 +17,19 @@ function PieChart({ expenses = [], dateLabel = "All Time" }) {
     Health: 0,
     Other: 0,
   };
+
   const expenseList = Array.isArray(expenses) ? expenses : [];
-  console.table(
-    expenseList.map((expense) => ({
-      title: expense.title,
-      category: expense.category,
-      type: expense.type,
-      amount: expense.amount,
-    }))
-  );
   expenseList.forEach((expense) => {
-  if (
-   expense.type === "Expense" &&
-    expense.category &&
-    Object.prototype.hasOwnProperty.call(categoryTotals, expense.category)
-  ) {
-    categoryTotals[expense.category] += expense.amount;
-  }
-});
-console.log(Object.values(categoryTotals));
-console.log(categoryTotals);
-console.table(expenses);
-console.table(
-  expenses.map((e) => ({
-    title: e.title,
-    type: e.type,
-    category: e.category,
-    amount: e.amount,
-  }))
-);
- const labels = ["Food", "Travel", "Shopping", "Bills", "Health", "Other"];
+    if (
+      expense.type === "Expense" &&
+      expense.category &&
+      Object.prototype.hasOwnProperty.call(categoryTotals, expense.category)
+    ) {
+      categoryTotals[expense.category] += Number(expense.amount) || 0;
+    }
+  });
 
-
-
+  const labels = ["Food", "Travel", "Shopping", "Bills", "Health", "Other"];
   const totalCategoryExpense = Object.values(categoryTotals).reduce(
     (acc, curr) => acc + curr,
     0
@@ -61,39 +41,42 @@ console.table(
     plugins: {
       legend: {
         position: "top",
+        labels: {
+          color: "#94a3b8",
+        },
       },
     },
-<<<<<<< HEAD
-  },
-};
-const filteredData = labels
-  .map((label) => ({
-    label,
-    value: categoryTotals[label],
-    color: {
-      Food: "#FF6384",
-      Travel: "#36A2EB",
-      Shopping: "#FFCE56",
-      Bills: "#4BC0C0",
-      Health: "#9966FF",
-      Other: "#FF9F40",
-    }[label],
-  }))
-  .filter((item) => item.value > 0);
-  const data = {
-  labels: filteredData.map((item) => item.label),
-  datasets: [
-    {
-      label: "Expenses",
-      data: filteredData.map((item) => item.value),
-      backgroundColor: filteredData.map((item) => item.color),
-    },
-  ],
-};
-=======
   };
 
->>>>>>> 6192511 (refactor: UI components, date filtering, and resolve lint/build checks)
+  const colorMap = {
+    Food: "#FF6384",
+    Travel: "#36A2EB",
+    Shopping: "#FFCE56",
+    Bills: "#4BC0C0",
+    Health: "#9966FF",
+    Other: "#FF9F40",
+  };
+
+  const filteredData = labels
+    .map((label) => ({
+      label,
+      value: categoryTotals[label],
+      color: colorMap[label],
+    }))
+    .filter((item) => item.value > 0);
+
+  const data = {
+    labels: filteredData.map((item) => item.label),
+    datasets: [
+      {
+        label: "Expenses",
+        data: filteredData.map((item) => item.value),
+        backgroundColor: filteredData.map((item) => item.color),
+        borderWidth: 0,
+      },
+    ],
+  };
+
   return (
     <div
       style={{
@@ -129,27 +112,20 @@ const filteredData = labels
         </span>
       </div>
 
-<<<<<<< HEAD
-    <Pie data={data} options={options} />
-   
-  </div>
-);
-=======
       {totalCategoryExpense === 0 ? (
-        <div style={{ marginTop: "60px", color: "#888" }}>
+        <div style={{ marginTop: "60px", color: "#888", textAlign: "center" }}>
           <p style={{ fontSize: "18px" }}>📊 No expense data yet</p>
           <p style={{ fontSize: "14px", marginTop: "10px" }}>
-            Add an expense above to view your category breakdown chart!
+            Add an expense to view your category breakdown chart!
           </p>
         </div>
       ) : (
-        <div style={{ height: "400px", marginTop: "10px" }}>
+        <div style={{ height: "300px", marginTop: "10px" }}>
           <Pie data={data} options={options} />
         </div>
       )}
     </div>
   );
->>>>>>> 6192511 (refactor: UI components, date filtering, and resolve lint/build checks)
 }
 
 export default PieChart;
