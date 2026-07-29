@@ -157,7 +157,7 @@ const getSingleExpense = async (req, res) => {
 // UPDATE EXPENSE
 const updateExpense = async (req, res) => {
   try {
-    const { title, amount, category ,type} = req.body;
+    const { title, amount, category } = req.body;
 
     // VALIDATE AMOUNT IF USER IS UPDATING IT
     if (

@@ -1,80 +1,198 @@
+<<<<<<< HEAD
 import ExpenseForm from "../components/ExpenseForm";
 import PieChart from "../components/PieChart";
 import BarChart from "../components/BarChart";
 
+=======
+>>>>>>> 6192511 (refactor: UI components, date filtering, and resolve lint/build checks)
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../config";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+import MetricCards from "../components/MetricCards";
+import ExpenseForm from "../components/ExpenseForm";
+import PieChart from "../components/PieChart";
+import ExpenseTable from "../components/ExpenseTable";
+import DateFilter from "../components/DateFilter";
+
 function Dashboard() {
+  const navigate = useNavigate();
   const [expenses, setExpenses] = useState([]);
   const [editingExpense, setEditingExpense] = useState(null);
+<<<<<<< HEAD
   const [searchTerm, setSearchTerm] = useState("");
   const [typeFilter, setTypeFilter] = useState("All");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const totalIncome = expenses
+=======
+  const [activeTab, setActiveTab] = useState("dashboard");
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [dateFilter, setDateFilter] = useState("30D");
+  const [customDate, setCustomDate] = useState("");
+  const [customRange, setCustomRange] = useState({ startDate: "", endDate: "" });
+
+  const [currentUser, setCurrentUser] = useState(() => {
+    const userString = localStorage.getItem("user");
+    try {
+      return userString ? JSON.parse(userString) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const getFilteredExpenses = () => {
+    const now = new Date();
+    
+    // 24 hours ago
+    const hours24Ago = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    
+    // 7 days ago
+    const days7Ago = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    days7Ago.setHours(0, 0, 0, 0);
+
+    // 30 days ago
+    const days30Ago = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    days30Ago.setHours(0, 0, 0, 0);
+
+    // 1 year ago (365 days ago)
+    const year1Ago = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
+    year1Ago.setHours(0, 0, 0, 0);
+
+    return expenses.filter((item) => {
+      if (!item.date) return true;
+      const itemDate = new Date(item.date);
+      const itemDateStr = itemDate.toISOString().split("T")[0];
+
+      switch (dateFilter) {
+        case "24h":
+        case "today":
+          return itemDate >= hours24Ago;
+        case "7D":
+        case "week":
+          return itemDate >= days7Ago;
+        case "30D":
+        case "month":
+          return itemDate >= days30Ago;
+        case "1Y":
+        case "year":
+          return itemDate >= year1Ago;
+        case "custom": {
+          if (customRange?.startDate && customRange?.endDate) {
+            return itemDateStr >= customRange.startDate && itemDateStr <= customRange.endDate;
+          }
+          if (customRange?.startDate) {
+            return itemDateStr >= customRange.startDate;
+          }
+          if (customRange?.endDate) {
+            return itemDateStr <= customRange.endDate;
+          }
+          if (customDate) {
+            return itemDateStr === customDate;
+          }
+          return true;
+        }
+        case "all":
+        default:
+          return true;
+      }
+    });
+  };
+
+  const filteredExpenses = getFilteredExpenses();
+
+  const getDateLabel = () => {
+    switch (dateFilter) {
+      case "24h":
+      case "today":
+        return "Last 24 Hours";
+      case "7D":
+      case "week":
+        return "Last 7 Days";
+      case "30D":
+      case "month":
+        return "Last 30 Days";
+      case "1Y":
+      case "year":
+        return "Last 365 Days";
+      case "custom":
+        if (customRange?.startDate && customRange?.endDate) {
+          return `${customRange.startDate} to ${customRange.endDate}`;
+        }
+        if (customRange?.startDate) return `From ${customRange.startDate}`;
+        if (customRange?.endDate) return `Until ${customRange.endDate}`;
+        if (customDate) return `Date: ${customDate}`;
+        return "Custom Range";
+      case "all":
+      default:
+        return "All Time";
+    }
+  };
+
+  const totalIncome = filteredExpenses
+>>>>>>> 6192511 (refactor: UI components, date filtering, and resolve lint/build checks)
     .filter((expense) => expense.type === "Income")
     .reduce((sum, expense) => sum + expense.amount, 0);
 
-  const totalExpense = expenses
+  const totalExpense = filteredExpenses
     .filter((expense) => expense.type === "Expense")
     .reduce((sum, expense) => sum + expense.amount, 0);
 
-
   const totalBalance = totalIncome - totalExpense;
-  console.log(expenses);
+
   const fetchExpenses = async () => {
     try {
-
       const token = localStorage.getItem("token");
-
-      const response = await axios.get(
-        `${API_BASE_URL}/api/expenses`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log(response.data.expenses);
-      console.log(response.data.expenses);
-
-
-      console.log(response.data);
-
-      setExpenses(response.data.expenses);
+      if (!token) return;
+      const response = await axios.get(`${API_BASE_URL}/api/expenses`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setExpenses(response.data.expenses || []);
     } catch (error) {
-      console.log(error);
+      console.log("Fetch Expenses Error:", error);
     }
   };
+
   useEffect(() => {
     const queryParams = new URLSearchParams(window.location.search);
     const tokenFromUrl = queryParams.get("token");
     const userFromUrl = queryParams.get("user");
 
     if (tokenFromUrl && userFromUrl) {
-      localStorage.setItem("token", tokenFromUrl);
-      localStorage.setItem("user", userFromUrl);
-      // Clean up the URL query parameters
-      window.history.replaceState({}, document.title, window.location.pathname);
+      try {
+        const parsedUser = JSON.parse(decodeURIComponent(userFromUrl));
+        localStorage.setItem("token", tokenFromUrl);
+        localStorage.setItem("user", JSON.stringify(parsedUser));
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setCurrentUser(parsedUser);
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } catch (e) {
+        console.error("Error parsing user from URL:", e);
+      }
+    } else {
+      const storedToken = localStorage.getItem("token");
+      if (!storedToken) {
+        navigate("/login");
+        return;
+      }
     }
 
     fetchExpenses();
-  }, []);
+  }, [navigate]);
+
   const deleteExpense = async (id) => {
     try {
       const token = localStorage.getItem("token");
-
-      await axios.delete(
-        `${API_BASE_URL}/api/expenses/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
+      await axios.delete(`${API_BASE_URL}/api/expenses/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
       alert("Expense Deleted Successfully!");
-
       fetchExpenses();
     } catch (error) {
       console.log(error);
@@ -96,165 +214,62 @@ function Dashboard() {
   return matchesSearch && matchesType;
 });
   return (
+    <div style={{ display: "flex", width: "100%", minHeight: "100vh", backgroundColor: "var(--bg-main)" }}>
+      {/* 1. Left Sidebar Navigation */}
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} user={currentUser} />
 
-    <div style={{ padding: "20px" }}>
-      <h1>Smart Expense Manager</h1>
+      {/* 2. Main Dashboard Content Area */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
+        {/* Top Header */}
+        <Header searchTerm={searchTerm} setSearchTerm={setSearchTerm} user={currentUser} />
 
-      <h2>Dashboard</h2>
+        {/* Content Container */}
+        <main style={{ padding: "32px", overflowY: "auto", flex: 1 }}>
+          {/* Date Filter Bar */}
+          <DateFilter
+            dateFilter={dateFilter}
+            setDateFilter={setDateFilter}
+            customDate={customDate}
+            setCustomDate={setCustomDate}
+            customRange={customRange}
+            setCustomRange={setCustomRange}
+          />
 
-      <div
-        style={{
-          display: "flex",
-          gap: "20px",
-          marginTop: "20px",
-        }}
-      >
-        <div
-          style={{
-            border: "1px solid #ccc",
-            padding: "20px",
-            width: "200px",
-            borderRadius: "10px",
-          }}
-        >
-          <h3>Total Balance</h3>
-          <p>₹{totalBalance}</p>
-        </div>
+          {/* Top Metric Cards */}
+          <MetricCards
+            totalBalance={totalBalance}
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            expenseCount={filteredExpenses.length}
+          />
 
-        <div
-          style={{
-            border: "1px solid #ccc",
-            padding: "20px",
-            width: "200px",
-            borderRadius: "10px",
-          }}
-        >
-          <h3>Total Income</h3>
-          <p>₹{totalIncome}</p>
-        </div>
+          {/* Middle Row: Quick Add Transaction Form + Pie Chart */}
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+              gap: "24px",
+              alignItems: "stretch",
+            }}
+          >
+            <ExpenseForm
+              fetchExpenses={fetchExpenses}
+              editingExpense={editingExpense}
+              setEditingExpense={setEditingExpense}
+            />
 
-        <div
-          style={{
-            border: "1px solid #ccc",
-            padding: "20px",
-            width: "200px",
-            borderRadius: "10px",
-          }}
-        >
-          <h3>Total Expense</h3>
-          <p>₹{totalExpense}</p>
-        </div>
+            <PieChart expenses={filteredExpenses} dateLabel={getDateLabel()} />
+          </div>
+
+          {/* Bottom Table: Recent Transactions */}
+          <ExpenseTable
+            expenses={filteredExpenses}
+            setEditingExpense={setEditingExpense}
+            deleteExpense={deleteExpense}
+            searchTerm={searchTerm}
+          />
+        </main>
       </div>
-      <ExpenseForm
-        fetchExpenses={fetchExpenses}
-        editingExpense={editingExpense}
-        setEditingExpense={setEditingExpense}
-      />
-      <h2 style={{ marginTop: "30px" }}>All Expenses</h2>
-      <input
-  type="text"
-  placeholder="Search by title..."
-  value={searchTerm}
-  onChange={(e) => setSearchTerm(e.target.value)}
-  style={{
-    padding: "10px",
-    width: "300px",
-    margin: "15px 0",
-    borderRadius: "8px",
-    border: "1px solid #ccc",
-  }}
-/>
-<select
-  value={typeFilter}
-  onChange={(e) => setTypeFilter(e.target.value)}
-  style={{
-    padding: "10px",
-    marginLeft: "15px",
-    borderRadius: "8px",
-  }}
->
-  <option value="All">All</option>
-  <option value="Income">Income</option>
-  <option value="Expense">Expense</option>
-</select>
-<select
-  value={categoryFilter}
-  onChange={(e) => setCategoryFilter(e.target.value)}
-  style={{
-    padding: "10px",
-    marginLeft: "15px",
-    borderRadius: "8px",
-  }}
->
-  <option value="All">All Categories</option>
-  <option value="Food">Food</option>
-  <option value="Travel">Travel</option>
-  <option value="Shopping">Shopping</option>
-  <option value="Bills">Bills</option>
-  <option value="Health">Health</option>
-  <option value="Other">Other</option>
-</select>
-      <PieChart expenses={expenses} />
-       <BarChart expenses={expenses} />
-
-      {expenses.length === 0 ? (
-        <p>No expenses found.</p>
-      ) : (
-        <table border="1" cellPadding="10" style={{ marginTop: "10px" }}>
-          <thead>
-            <tr>
-              <th>Title</th>
-              <th>Amount</th>
-              <th>Category</th>
-              <th>Type</th>
-              <th>Date</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {filteredExpenses.map((expense) => (
-              <tr key={expense._id}>
-                <td>{expense.title}</td>
-                <td>₹{expense.amount}</td>
-                <td>{expense.category}</td>
-                <td>{expense.type}</td>
-                <td>{new Date(expense.date).toLocaleDateString()}</td>
-                <td>
-                  <button
-                    onClick={() => setEditingExpense(expense)}
-                    style={{
-                      backgroundColor: "green",
-                      color: "white",
-                      border: "none",
-                      padding: "6px 12px",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                      marginRight: "10px",
-                    }}
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() => deleteExpense(expense._id)}
-                    style={{
-                      backgroundColor: "red",
-                      color: "white",
-                      border: "none",
-                      padding: "6px 12px",
-                      borderRadius: "5px",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
     </div>
   );
 }

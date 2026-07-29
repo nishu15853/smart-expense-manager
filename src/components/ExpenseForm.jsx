@@ -12,8 +12,9 @@ function ExpenseForm( {fetchExpenses, editingExpense,setEditingExpense} ) {
     date: "",
   });
   useEffect(() => {
-  if (editingExpense) {
-    setExpense({
+    if (editingExpense) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setExpense({
       title: editingExpense.title,
       amount: editingExpense.amount,
       category: editingExpense.category,
@@ -116,73 +117,119 @@ setEditingExpense(null);
 };
 
   return (
-    <div style={{ marginTop: "40px" }}>
-      <h2>Add Expense</h2>
+    <div
+      style={{
+        backgroundColor: "var(--bg-card)",
+        borderRadius: "var(--radius-lg)",
+        padding: "24px",
+        border: "1px solid var(--border-color)",
+        boxShadow: "var(--shadow-sm)",
+        height: "100%",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+        <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#f8fafc", margin: 0 }}>
+          {editingExpense ? "✏️ Edit Transaction" : "➕ Add Transaction"}
+        </h2>
+        {editingExpense && (
+          <button
+            type="button"
+            onClick={() => {
+              setEditingExpense(null);
+              setExpense({ title: "", amount: "", category: "", type: "", date: "" });
+            }}
+            style={{
+              fontSize: "12px",
+              color: "var(--text-muted)",
+              backgroundColor: "transparent",
+              border: "none",
+              cursor: "pointer",
+            }}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
 
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="title"
-          placeholder="Expense Title"
-          value={expense.title}
-          onChange={handleChange}
-          required
-        />
+      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+        <div className="form-group">
+          <label>Title</label>
+          <input
+            type="text"
+            name="title"
+            placeholder="e.g. Grocery Shopping"
+            value={expense.title}
+            onChange={handleChange}
+            className="form-input"
+            required
+          />
+        </div>
 
-        <br /><br />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div className="form-group">
+            <label>Amount (₹)</label>
+            <input
+              type="number"
+              name="amount"
+              placeholder="0.00"
+              value={expense.amount}
+              onChange={handleChange}
+              className="form-input"
+              required
+            />
+          </div>
 
-        <input
-          type="number"
-          name="amount"
-          placeholder="Amount"
-          value={expense.amount}
-          onChange={handleChange}
-          required
-        />
+          <div className="form-group">
+            <label>Type</label>
+            <select
+              name="type"
+              value={expense.type}
+              onChange={handleChange}
+              className="form-select"
+              required
+            >
+              <option value="">Select Type</option>
+              <option value="Expense">Expense</option>
+              <option value="Income">Income</option>
+            </select>
+          </div>
+        </div>
 
-        <br /><br />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+          <div className="form-group">
+            <label>Category</label>
+            <select
+              name="category"
+              value={expense.category}
+              onChange={handleChange}
+              className="form-select"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Food">Food</option>
+              <option value="Travel">Travel</option>
+              <option value="Shopping">Shopping</option>
+              <option value="Bills">Bills</option>
+              <option value="Health">Health</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
 
-        <select
-          name="category"
-          value={expense.category}
-          onChange={handleChange}
-          required
-        >
-          <option value="">Select Category</option>
-          <option value="Food">Food</option>
-          <option value="Travel">Travel</option>
-          <option value="Shopping">Shopping</option>
-          <option value="Bills">Bills</option>
-          <option value="Health">Health</option>
-          <option value="Other">Other</option>
-        </select>
+          <div className="form-group">
+            <label>Date</label>
+            <input
+              type="date"
+              name="date"
+              value={expense.date}
+              onChange={handleChange}
+              className="form-input"
+              required
+            />
+          </div>
+        </div>
 
-        <br /><br />
-        <select
-  name="type"
-  value={expense.type}
-  onChange={handleChange}
-  required
->
-  <option value="">Select Type</option>
-  <option value="Income">Income</option>
-  <option value="Expense">Expense</option>
-</select>
-
-<br /><br />
-
-        <input
-          type="date"
-          name="date"
-          value={expense.date}
-          onChange={handleChange}
-          required
-        />
-
-        <br /><br />
-
-        <button type="submit">
-         {editingExpense ? "Update Expense" : "Add Expense"}
+        <button type="submit" className="btn-primary" style={{ marginTop: "8px", width: "100%" }}>
+          {editingExpense ? "Update Transaction" : "Save Transaction"}
         </button>
       </form>
     </div>
