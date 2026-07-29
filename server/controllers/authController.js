@@ -158,6 +158,13 @@ const handleGoogleCallback = async (req, res) => {
     const redirectUri = process.env.GOOGLE_CALLBACK_URL;
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
+    console.log("Exchanging Google code with:", {
+      clientId,
+      redirectUri,
+      hasSecret: !!clientSecret,
+      code: code ? code.substring(0, 10) + "..." : undefined
+    });
+
     // Exchange authorization code for token
     const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -170,13 +177,16 @@ const handleGoogleCallback = async (req, res) => {
         client_secret: clientSecret,
         redirect_uri: redirectUri,
         grant_type: "authorization_code",
-      }),
+      }).toString(),
     });
 
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text();
       console.error("Token exchange failed:", errorText);
-      return res.status(400).json({ message: "Failed to exchange authorization code" });
+      return res.status(400).json({ 
+        message: "Failed to exchange authorization code",
+        details: errorText 
+      });
     }
 
     const tokenData = await tokenResponse.json();
