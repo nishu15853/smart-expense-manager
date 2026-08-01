@@ -55,13 +55,13 @@ async function fetchBankEmails(tokens) {
 
   const gmail = google.gmail({ version: "v1", auth: oauth2Client });
 
-  // Search query focusing on Indian bank transaction alerts
-  const query = "subject:(debited OR credited OR paid OR received OR SBI OR HDFC OR ICICI OR Axis OR Paytm OR PhonePe OR Kotak OR IDFC OR Baroda OR PNB)";
+  // Search query focusing on Indian bank & wallet transaction alerts (SBI, HDFC, FamPay, PhonePe, Paytm, etc.)
+  const query = "debited OR credited OR paid OR received OR SBI OR HDFC OR ICICI OR Axis OR Paytm OR PhonePe OR FamPay OR FamApp OR Kotak OR IDFC OR Baroda OR PNB OR CRED OR Jupiter OR GPay";
 
   const res = await gmail.users.messages.list({
     userId: "me",
     q: query,
-    maxResults: 35,
+    maxResults: 50,
   });
 
   const messages = res.data.messages || [];
@@ -105,7 +105,7 @@ function parseEmailMessage(messageData) {
   const fullText = `${subject} ${bodyText}`;
 
   // Must contain strong financial indicator words
-  if (!/(?:debited|credited|paid|spent|sent|received|transfer|deposited|withdrawal|upi|vpa|a\/c|bank|payment|receipt|invoice|alert)/i.test(fullText)) {
+  if (!/(?:debited|credited|paid|spent|sent|received|transfer|deposited|withdrawal|upi|vpa|a\/c|bank|payment|receipt|invoice|alert|fampay|famapp)/i.test(fullText)) {
     return null;
   }
 
@@ -117,12 +117,21 @@ function parseEmailMessage(messageData) {
   const amount = parseFloat(rawAmt);
   if (!amount || isNaN(amount) || amount <= 0) return null;
 
-  // Determine Debit vs Credit
-  let type = "Expense";
-  if (/(?:credited|received|added|refund|deposited|\+₹|\+Rs)/i.test(fullText)) {
-    type = "Income";
-  } else if (/(?:debited|paid|spent|sent|withdrawn|deducted|-₹|-Rs)/i.test(fullText)) {
+  // Accurately determine Debit (Expense) vs Credit (Income)
+  const textLower = fullText.toLowerCase();
+  let type = "Expense"; // Default fallback
+
+  const isDebit = /(?:debited|paid|spent|sent to|withdrawn|deducted|purchase|debit|-₹|-rs)/i.test(textLower);
+  const isCredit = /(?:credited|received from|added to wallet|refund|salary|deposited|credit|\+₹|\+rs)/i.test(textLower);
+
+  if (isDebit && !textLower.includes("credited to")) {
     type = "Expense";
+  } else if (isCredit && !textLower.includes("debited from") && !textLower.includes("paid to")) {
+    type = "Income";
+  } else if (isDebit) {
+    type = "Expense";
+  } else if (isCredit) {
+    type = "Income";
   }
 
   // Extract Merchant with specific financial phrases
@@ -192,9 +201,13 @@ function getEmailBody(payload) {
  * Extract Bank Name from Subject
  */
 function extractBankName(subject) {
-  const banks = ["SBI", "HDFC", "ICICI", "Axis", "Kotak", "IDFC", "Paytm", "PhonePe", "FamPay", "PNB", "Bank of Baroda"];
+  const banks = [
+    "FamPay", "FamApp", "SBI", "HDFC", "ICICI", "Axis", "Kotak", "IDFC",
+    "Paytm", "PhonePe", "Google Pay", "GPay", "Amazon Pay", "Jupiter",
+    "Fi", "Slice", "CRED", "PNB", "Bank of Baroda", "Canara Bank", "Union Bank"
+  ];
   for (const bank of banks) {
-    if (new RegExp(bank, "i").test(subject)) {
+    if (new RegExp(`\\b${bank}\\b`, "i").test(subject)) {
       return `${bank} Alert`;
     }
   }
