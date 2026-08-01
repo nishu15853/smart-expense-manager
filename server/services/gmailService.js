@@ -11,7 +11,8 @@ function getOAuth2Client() {
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri =
     process.env.GOOGLE_REDIRECT_URI ||
-    "http://localhost:5000/api/import/gmail/callback";
+    process.env.GOOGLE_CALLBACK_URL ||
+    "http://localhost:5000/api/auth/google/callback";
 
   return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
@@ -21,11 +22,16 @@ function getOAuth2Client() {
  */
 function getGmailAuthUrl(userId) {
   const oauth2Client = getOAuth2Client();
+  const statePayload = JSON.stringify({
+    userId: userId ? userId.toString() : "",
+    mode: "gmail_import",
+  });
+
   return oauth2Client.generateAuthUrl({
     access_type: "offline",
     scope: SCOPES,
     prompt: "consent",
-    state: userId ? userId.toString() : "",
+    state: statePayload,
   });
 }
 

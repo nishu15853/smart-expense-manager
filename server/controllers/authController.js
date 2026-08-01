@@ -147,7 +147,7 @@ const redirectToGoogle = (req, res) => {
 // HANDLE GOOGLE CALLBACK
 const handleGoogleCallback = async (req, res) => {
   try {
-    const { code } = req.query;
+    const { code, state } = req.query;
 
     if (!code) {
       return res.status(400).json({ message: "Authorization code is missing" });
@@ -157,6 +157,50 @@ const handleGoogleCallback = async (req, res) => {
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const redirectUri = process.env.GOOGLE_CALLBACK_URL;
     const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+
+    // Check if state indicates Gmail import mode
+    if (state) {
+      try {
+        const stateObj = typeof state === "string" && state.startsWith("{") ? JSON.parse(state) : null;
+        if (stateObj && stateObj.mode === "gmail_import") {
+          const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+              code,
+              client_id: clientId,
+              client_secret: clientSecret,
+              redirect_uri: redirectUri,
+              grant_type: "authorization_code",
+            }).toString(),
+          });
+
+          const tokens = await tokenResponse.json();
+          const encodedTokens = encodeURIComponent(JSON.stringify(tokens));
+
+          return res.send(`
+            <!DOCTYPE html>
+            <html>
+              <head><title>Gmail Connected</title></head>
+              <body style="font-family: sans-serif; text-align: center; padding: 40px; background: #0f172a; color: #f8fafc;">
+                <h2>✅ Gmail Connection Successful!</h2>
+                <p>You can close this window now.</p>
+                <script>
+                  if (window.opener) {
+                    window.opener.postMessage({ type: 'GMAIL_CONNECTED', tokens: ${JSON.stringify(tokens)} }, '*');
+                    window.close();
+                  } else {
+                    window.location.href = '${frontendUrl}/dashboard?gmail_tokens=${encodedTokens}';
+                  }
+                </script>
+              </body>
+            </html>
+          `);
+        }
+      } catch (err) {
+        console.error("Gmail State Parse Error:", err);
+      }
+    }
 
     console.log("Exchanging Google code with:", {
       clientId,
