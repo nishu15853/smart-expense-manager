@@ -9,11 +9,12 @@ const { detectDuplicates } = require("../services/duplicateDetector");
  */
 exports.getGmailAuthUrl = async (req, res) => {
   try {
-    const authUrl = getGmailAuthUrl(req.user._id);
+    const userId = req.user ? req.user._id : null;
+    const authUrl = getGmailAuthUrl(userId);
     res.json({ success: true, authUrl });
   } catch (error) {
     console.error("Auth URL Error:", error);
-    res.status(500).json({ message: "Failed to generate Google Auth URL" });
+    res.status(500).json({ message: error.message || "Failed to generate Google Auth URL" });
   }
 };
 

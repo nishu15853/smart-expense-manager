@@ -9,7 +9,9 @@ const SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"];
 function getOAuth2Client() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
-  const redirectUri = process.env.GOOGLE_REDIRECT_URI || "http://localhost:5000/api/import/gmail/callback";
+  const redirectUri =
+    process.env.GOOGLE_REDIRECT_URI ||
+    "http://localhost:5000/api/import/gmail/callback";
 
   return new google.auth.OAuth2(clientId, clientSecret, redirectUri);
 }
@@ -23,7 +25,7 @@ function getGmailAuthUrl(userId) {
     access_type: "offline",
     scope: SCOPES,
     prompt: "consent",
-    state: userId,
+    state: userId ? userId.toString() : "",
   });
 }
 
