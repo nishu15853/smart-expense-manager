@@ -27,4 +27,8 @@ app.use("/api/auth", authRoutes);
 // Expense Routes
 app.use("/api/expenses", expenseRoutes);
 
+// Transaction Import Routes
+const importRoutes = require("./routes/importRoutes");
+app.use("/api/import", importRoutes);
+
 module.exports = app;

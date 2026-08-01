@@ -6,6 +6,8 @@ import Sidebar from "../components/Sidebar";
 import Header from "../components/Header";
 import MetricCards from "../components/MetricCards";
 import ExpenseForm from "../components/ExpenseForm";
+import ImportSection from "../components/ImportSection";
+import TransactionPreviewModal from "../components/TransactionPreviewModal";
 import PieChart from "../components/PieChart";
 import ExpenseTable from "../components/ExpenseTable";
 import DateFilter from "../components/DateFilter";
@@ -16,6 +18,7 @@ function Dashboard() {
   const [editingExpense, setEditingExpense] = useState(null);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
+  const [previewData, setPreviewData] = useState(null);
   const typeFilter = "All";
   const categoryFilter = "All";
 
@@ -230,11 +233,11 @@ function Dashboard() {
             expenseCount={filteredExpenses.length}
           />
 
-          {/* Middle Row: Quick Add Transaction Form + Pie Chart */}
+          {/* Middle Row: Quick Add Transaction Form + Import Section + Pie Chart */}
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
               gap: "24px",
               alignItems: "stretch",
             }}
@@ -244,6 +247,8 @@ function Dashboard() {
               editingExpense={editingExpense}
               setEditingExpense={setEditingExpense}
             />
+
+            <ImportSection onPreviewTransactions={(data) => setPreviewData(data)} />
 
             <PieChart expenses={filteredExpenses} dateLabel={getDateLabel()} />
           </div>
@@ -257,6 +262,15 @@ function Dashboard() {
           />
         </main>
       </div>
+
+      {/* Transaction Import Preview Modal */}
+      {previewData && (
+        <TransactionPreviewModal
+          previewData={previewData}
+          onClose={() => setPreviewData(null)}
+          onImportSuccess={() => fetchExpenses()}
+        />
+      )}
     </div>
   );
 }

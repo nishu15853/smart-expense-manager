@@ -34,6 +34,30 @@ const expenseSchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+
+    source: {
+      type: String,
+      enum: ["Manual", "Gmail", "Bank Statement"],
+      default: "Manual",
+    },
+
+    upiRef: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    accountLast4: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+
+    description: {
+      type: String,
+      default: "",
+      trim: true,
+    },
   },
   {
     timestamps: true,

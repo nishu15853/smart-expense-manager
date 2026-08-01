@@ -89,7 +89,12 @@ function ExpenseTable({ expenses = [], setEditingExpense, deleteExpense, searchT
                     onMouseOut={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
                   >
                     <td style={{ padding: "16px", fontSize: "14px", fontWeight: "600", color: "#f8fafc" }}>
-                      {expense.title}
+                      <div>{expense.title}</div>
+                      {expense.source && expense.source !== "Manual" ? (
+                        <span style={{ fontSize: "10px", padding: "2px 6px", borderRadius: "4px", backgroundColor: "rgba(99, 102, 241, 0.2)", color: "#a5b4fc", marginTop: "4px", display: "inline-block", fontWeight: "500" }}>
+                          {expense.source === "Gmail" ? "📧 Gmail Import" : "📄 Statement Import"}
+                        </span>
+                      ) : null}
                     </td>
                     <td style={{ padding: "16px" }}>
                       <span className={`badge ${getCategoryBadgeClass(expense.category)}`}>

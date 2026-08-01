@@ -13,11 +13,25 @@ function Sidebar({ activeTab = "dashboard", setActiveTab, user }) {
   };
 
   const navItems = [
-    { id: "dashboard", label: "Dashboard", icon: "📊" },
-    { id: "expenses", label: "Transactions", icon: "💳" },
-    { id: "analytics", label: "Analytics", icon: "📈" },
-    { id: "settings", label: "Settings", icon: "⚙️" },
+    { id: "dashboard", label: "Dashboard", icon: "📊", path: "/dashboard" },
+    { id: "expenses", label: "Transactions", icon: "💳", path: "/dashboard" },
+    { id: "history", label: "Import History", icon: "📜", path: "/history" },
+    { id: "analytics", label: "Analytics", icon: "📈", path: "/dashboard" },
+    { id: "settings", label: "Settings", icon: "⚙️", path: "/dashboard" },
   ];
+
+  const handleNavClick = (item) => {
+    if (item.path === "/history") {
+      navigate("/history");
+    } else {
+      if (window.location.pathname !== "/dashboard") {
+        navigate("/dashboard");
+      }
+      if (setActiveTab) {
+        setActiveTab(item.id);
+      }
+    }
+  };
 
   return (
     <aside
@@ -77,7 +91,7 @@ function Sidebar({ activeTab = "dashboard", setActiveTab, user }) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab && setActiveTab(item.id)}
+                onClick={() => handleNavClick(item)}
                 style={{
                   display: "flex",
                   alignItems: "center",
