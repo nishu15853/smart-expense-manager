@@ -104,8 +104,8 @@ function parseEmailMessage(messageData) {
   const bodyText = getEmailBody(payload) || snippet;
   const fullText = `${subject} ${bodyText}`;
 
-  // Filter out promotional, spam, OTPs, newsletters
-  if (/otp|verification code|one time password|sale live|discount|offer|cashback offer/i.test(subject)) {
+  // Must contain strong financial indicator words
+  if (!/(?:debited|credited|paid|spent|sent|received|transfer|deposited|withdrawal|upi|vpa|a\/c|bank|payment|receipt|invoice|alert)/i.test(fullText)) {
     return null;
   }
 
@@ -125,12 +125,17 @@ function parseEmailMessage(messageData) {
     type = "Expense";
   }
 
-  // Extract Merchant
+  // Extract Merchant with specific financial phrases
   const merchantMatch =
-    fullText.match(/(?:to|at|paid to|spent on)\s+([A-Za-z0-9\s&\.]{2,30}?)(?:\s+on|\s+via|\s+ref|\s+using|\s+a\/c|\.|$)/i) ||
-    fullText.match(/(?:from|received from)\s+([A-Za-z0-9\s&\.]{2,30}?)(?:\s+on|\s+via|\s+ref|\s+in|\.|$)/i);
+    fullText.match(/(?:paid to|spent on|transfer to|sent to|debited for|payment to)\s+([A-Za-z0-9\s&\.\-]{3,30}?)(?:\s+on|\s+via|\s+ref|\s+using|\s+a\/c|\.|$)/i) ||
+    fullText.match(/(?:received from|credited by|refund from|deposited by)\s+([A-Za-z0-9\s&\.\-]{3,30}?)(?:\s+on|\s+via|\s+ref|\s+in|\.|$)/i);
 
-  const merchant = merchantMatch ? merchantMatch[1].trim() : extractBankName(subject) || "Transaction Alert";
+  let merchant = merchantMatch ? merchantMatch[1].trim() : "";
+
+  // Filter out noise, pure numbers (e.g. "65"), very short words ("CV"), or currency strings ("INR 1")
+  if (!merchant || merchant.length < 3 || /^\d+$/.test(merchant) || /^INR\s*\d+/i.test(merchant)) {
+    merchant = extractBankName(subject) || extractBankName(fullText) || "Payment Alert";
+  }
 
   // Extract UPI Reference Number
   const upiMatch = fullText.match(/(?:UPI|Ref|RRn|Txn)\s*(?:No\.?|Id\.?)?\s*:?\s*([0-9]{9,14})/i) || fullText.match(/\b([0-9]{12})\b/);

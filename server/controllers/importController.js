@@ -9,7 +9,7 @@ const { detectDuplicates } = require("../services/duplicateDetector");
  */
 exports.getGmailAuthUrl = async (req, res) => {
   try {
-    const userId = req.user ? req.user._id : null;
+    const userId = req.userId || req.user?._id;
     const authUrl = getGmailAuthUrl(userId);
     res.json({ success: true, authUrl });
   } catch (error) {
@@ -68,8 +68,9 @@ exports.fetchGmailTransactions = async (req, res) => {
       return res.status(400).json({ message: "Gmail access tokens are required." });
     }
 
+    const userId = req.userId || req.user?._id;
     const rawTransactions = await fetchBankEmails(tokens);
-    const checkedTransactions = await detectDuplicates(rawTransactions, req.user._id);
+    const checkedTransactions = await detectDuplicates(rawTransactions, userId);
 
     res.json({
       success: true,
@@ -102,7 +103,8 @@ exports.uploadBankStatement = async (req, res) => {
       return res.status(400).json({ message: "Unsupported file format. Please upload PDF or CSV." });
     }
 
-    const checkedTransactions = await detectDuplicates(rawTransactions, req.user._id);
+    const userId = req.userId || req.user?._id;
+    const checkedTransactions = await detectDuplicates(rawTransactions, userId);
 
     res.json({
       success: true,
@@ -127,7 +129,7 @@ exports.saveImportedBatch = async (req, res) => {
       return res.status(400).json({ message: "No transactions selected for import." });
     }
 
-    const userId = req.user._id;
+    const userId = req.userId || req.user?._id;
 
     // Prepare docs to insert into Expense collection
     const docsToInsert = transactions.map((t) => ({
@@ -165,8 +167,9 @@ exports.saveImportedBatch = async (req, res) => {
 
     // Log failure in history
     try {
+      const userId = req.userId || req.user?._id;
       await ImportLog.create({
-        user: req.user._id,
+        user: userId,
         source: req.body.source || "Bank Statement",
         importedCount: 0,
         duplicatesCount: 0,
@@ -186,7 +189,8 @@ exports.saveImportedBatch = async (req, res) => {
  */
 exports.getImportHistory = async (req, res) => {
   try {
-    const logs = await ImportLog.find({ user: req.user._id }).sort({ importedAt: -1 }).lean();
+    const userId = req.userId || req.user?._id;
+    const logs = await ImportLog.find({ user: userId }).sort({ importedAt: -1 }).lean();
     res.json({ success: true, logs });
   } catch (error) {
     console.error("Fetch Import History Error:", error);

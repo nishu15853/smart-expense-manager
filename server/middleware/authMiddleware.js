@@ -23,6 +23,7 @@ const protect = (req, res, next) => {
 
     // User ID request me store karna
     req.userId = decoded.userId;
+    req.user = { _id: decoded.userId, id: decoded.userId };
 
     // Next controller ko request bhejna
     next();
