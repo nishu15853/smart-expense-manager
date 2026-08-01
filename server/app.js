@@ -6,6 +6,8 @@ require("dotenv").config({ path: path.resolve(__dirname, ".env") });
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
+const budgetRoutes = require("./routes/budgetRoutes");
+const goalRoutes = require("./routes/goalRoutes");
 
 const app = express();
 
@@ -26,6 +28,12 @@ app.use("/api/auth", authRoutes);
 
 // Expense Routes
 app.use("/api/expenses", expenseRoutes);
+
+// Budget Routes
+app.use("/api/budget", budgetRoutes);
+
+//Goal Routes
+app.use("/api/goals", goalRoutes);
 
 // Transaction Import Routes
 const importRoutes = require("./routes/importRoutes");
