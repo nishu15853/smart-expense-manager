@@ -233,33 +233,83 @@ function Dashboard() {
             expenseCount={filteredExpenses.length}
           />
 
-          {/* Middle Row: Quick Add Transaction Form + Import Section + Pie Chart */}
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))",
-              gap: "24px",
-              alignItems: "stretch",
-            }}
-          >
-            <ExpenseForm
-              fetchExpenses={fetchExpenses}
-              editingExpense={editingExpense}
-              setEditingExpense={setEditingExpense}
-            />
+          {activeTab === "analytics" ? (
+            /* Dedicated Analytics View */
+            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))", gap: "24px", alignItems: "stretch" }}>
+                <PieChart expenses={filteredExpenses} dateLabel={getDateLabel()} />
+                <div
+                  style={{
+                    backgroundColor: "var(--bg-card)",
+                    borderRadius: "var(--radius-lg)",
+                    padding: "24px",
+                    border: "1px solid var(--border-color)",
+                    boxShadow: "var(--shadow-sm)",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                  }}
+                >
+                  <h3 style={{ fontSize: "16px", fontWeight: "700", color: "#f8fafc", margin: "0 0 16px 0" }}>
+                    📈 Analytics Summary ({getDateLabel()})
+                  </h3>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "14px" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(15, 23, 42, 0.5)", borderRadius: "var(--radius-md)" }}>
+                      <span style={{ color: "var(--text-muted)" }}>Total Tracked Volume:</span>
+                      <strong style={{ color: "#f8fafc" }}>₹{(totalIncome + totalExpense).toLocaleString()}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(34, 197, 94, 0.1)", borderRadius: "var(--radius-md)" }}>
+                      <span style={{ color: "var(--text-muted)" }}>Total Income:</span>
+                      <strong style={{ color: "#4ade80" }}>+₹{totalIncome.toLocaleString()}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(239, 68, 68, 0.1)", borderRadius: "var(--radius-md)" }}>
+                      <span style={{ color: "var(--text-muted)" }}>Total Expenses:</span>
+                      <strong style={{ color: "#f87171" }}>-₹{totalExpense.toLocaleString()}</strong>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 14px", backgroundColor: "rgba(99, 102, 241, 0.1)", borderRadius: "var(--radius-md)" }}>
+                      <span style={{ color: "var(--text-muted)" }}>Net Balance:</span>
+                      <strong style={{ color: totalBalance >= 0 ? "#4ade80" : "#f87171" }}>₹{totalBalance.toLocaleString()}</strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <ExpenseTable
+                expenses={filteredExpenses}
+                setEditingExpense={setEditingExpense}
+                deleteExpense={deleteExpense}
+                searchTerm={searchTerm}
+              />
+            </div>
+          ) : (
+            /* Main Dashboard View */
+            <>
+              {/* Middle Row: Quick Add Transaction Form + Import Section */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(auto-fit, minmax(380px, 1fr))",
+                  gap: "24px",
+                  alignItems: "stretch",
+                }}
+              >
+                <ExpenseForm
+                  fetchExpenses={fetchExpenses}
+                  editingExpense={editingExpense}
+                  setEditingExpense={setEditingExpense}
+                />
 
-            <ImportSection onPreviewTransactions={(data) => setPreviewData(data)} />
+                <ImportSection onPreviewTransactions={(data) => setPreviewData(data)} />
+              </div>
 
-            <PieChart expenses={filteredExpenses} dateLabel={getDateLabel()} />
-          </div>
-
-          {/* Bottom Table: Recent Transactions */}
-          <ExpenseTable
-            expenses={filteredExpenses}
-            setEditingExpense={setEditingExpense}
-            deleteExpense={deleteExpense}
-            searchTerm={searchTerm}
-          />
+              {/* Bottom Table: Recent Transactions */}
+              <ExpenseTable
+                expenses={filteredExpenses}
+                setEditingExpense={setEditingExpense}
+                deleteExpense={deleteExpense}
+                searchTerm={searchTerm}
+              />
+            </>
+          )}
         </main>
       </div>
 

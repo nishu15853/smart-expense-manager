@@ -1,12 +1,19 @@
+import { useState } from "react";
+
 function ExpenseTable({ expenses = [], setEditingExpense, deleteExpense, searchTerm = "" }) {
+  const [tableTypeFilter, setTableTypeFilter] = useState("All");
+
   const filteredExpenses = expenses.filter((item) => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      item.title?.toLowerCase().includes(term) ||
-      item.category?.toLowerCase().includes(term) ||
-      item.type?.toLowerCase().includes(term)
-    );
+    const matchesSearch =
+      !searchTerm ||
+      item.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.category?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.type?.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesType =
+      tableTypeFilter === "All" || item.type === tableTypeFilter;
+
+    return matchesSearch && matchesType;
   });
 
   const getCategoryBadgeClass = (category) => {
@@ -31,7 +38,7 @@ function ExpenseTable({ expenses = [], setEditingExpense, deleteExpense, searchT
         marginTop: "28px",
       }}
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
         <div>
           <h2 style={{ fontSize: "18px", fontWeight: "700", color: "#f8fafc", margin: 0 }}>
             Recent Transactions
@@ -39,6 +46,55 @@ function ExpenseTable({ expenses = [], setEditingExpense, deleteExpense, searchT
           <p style={{ fontSize: "13px", color: "var(--text-muted)", marginTop: "4px" }}>
             Showing {filteredExpenses.length} transaction{filteredExpenses.length !== 1 ? "s" : ""}
           </p>
+        </div>
+
+        {/* Income / Expense Filter Pills */}
+        <div
+          style={{
+            display: "flex",
+            backgroundColor: "rgba(15, 23, 42, 0.6)",
+            padding: "4px",
+            borderRadius: "var(--radius-md)",
+            border: "1px solid rgba(51, 65, 85, 0.6)",
+            gap: "4px",
+          }}
+        >
+          {["All", "Expense", "Income"].map((type) => {
+            const active = tableTypeFilter === type;
+            return (
+              <button
+                key={type}
+                type="button"
+                onClick={() => setTableTypeFilter(type)}
+                style={{
+                  padding: "6px 14px",
+                  fontSize: "12px",
+                  fontWeight: "600",
+                  borderRadius: "var(--radius-sm)",
+                  border: "none",
+                  backgroundColor: active
+                    ? type === "Income"
+                      ? "rgba(34, 197, 94, 0.2)"
+                      : type === "Expense"
+                      ? "rgba(239, 68, 68, 0.2)"
+                      : "var(--primary)"
+                    : "transparent",
+                  color: active
+                    ? type === "Income"
+                      ? "#4ade80"
+                      : type === "Expense"
+                      ? "#f87171"
+                      : "#ffffff"
+                    : "var(--text-muted)",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  boxShadow: active ? "0 2px 8px rgba(0,0,0,0.2)" : "none",
+                }}
+              >
+                {type === "Income" ? "↑ Income" : type === "Expense" ? "↓ Expense" : "All"}
+              </button>
+            );
+          })}
         </div>
       </div>
 
